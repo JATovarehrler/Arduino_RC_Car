@@ -30,30 +30,39 @@ int address[6] = "00119";
 RF24 radio(CE, CSN);
 
 // DC MOTOR PINS
-const byte rightMotor=3; // ENABLE FOR RIGHT MOTOR
-const byte rightMotor_forward=2;
-const byte rightMotor_backward=4
-const byte leftMotor=
+const byte rightMotor = 3; // ENABLE FOR RIGHT MOTOR
+const byte rightMotor_forward = 2;
+const byte rightMotor_backward = 4
+                                 const byte leftMotor = 5; //  ENABLE FOR LEFT MOTOR
+const byte leftMotor_forward = 10;
+const byte leftMotor_backward = 12;
 
 
 
 void setup()
 {
-  // SERIAL SETUP
+  //  SERIAL SETUP
   Serial.begin();
   while (!Serial);
 
-  //RF24 SETUP
+  //  RF24 SETUP
   radio.begin();
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MAX);
   radio.startListening();
 
-  // SERVOS SETUP
+  //  SERVOS SETUP
   steering.attach(steeringPin);
   gripp.attach(grippPin);
   lift.attach(liftPin);
 
+  //  DC MOTORS SETUP
+  pinMode(rightMotor, OUTPUT);
+  pinMode(rightMotor_forward, OUTPUT);
+  pinMode(rightMotor_backward, OUTPUT);
+  pinMode(leftMotor, OUTPUT);
+  pinMode(leftMotor_forward, OUTPUT);
+  pinMode(leftMotor_backward, OUTPUT);
 }
 
 void loop()
