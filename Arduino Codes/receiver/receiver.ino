@@ -11,6 +11,10 @@
 #include <RF24.h>
 #include <RF24_config.h>
 
+//  DEFINITIONS
+#define CE 7
+#define CSN 8
+
 // SERVO PINS
 const byte steeringPin = 9;
 const byte grippPin = XXXX;
@@ -23,6 +27,7 @@ Servo lift;
 
 // NRF24 MISC
 int address[6] = "00119";
+RF24 radio(CE,CSN);
 
 
 
@@ -30,7 +35,8 @@ void setup()
 {
   // SERIAL SETUP
   Serial.begin();
-  while (!Serial()
+  while (!Serial);
+  
   //RF24 SETUP
   radio.begin();
   radio.openReadingPipe(0,address);
