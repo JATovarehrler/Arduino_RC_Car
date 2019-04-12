@@ -1,5 +1,6 @@
 /* RC Receiver
    Jose Tovar and Keren Elvir
+   Trevecca Nazarene University
    SP2019
 */
 
