@@ -11,7 +11,7 @@
 #include <RF24.h>
 #include <RF24_config.h>
 
-//  DEFINITIONS
+//  DEFINITIONS NRF24 MODULE
 #define CE 7
 #define CSN 8
 
@@ -27,7 +27,13 @@ Servo lift;
 
 // NRF24 MISC
 int address[6] = "00119";
-RF24 radio(CE,CSN);
+RF24 radio(CE, CSN);
+
+// DC MOTOR PINS
+const byte rightMotor=3; // ENABLE FOR RIGHT MOTOR
+const byte rightMotor_forward=2;
+const byte rightMotor_backward=4
+const byte leftMotor=
 
 
 
@@ -36,10 +42,10 @@ void setup()
   // SERIAL SETUP
   Serial.begin();
   while (!Serial);
-  
+
   //RF24 SETUP
   radio.begin();
-  radio.openReadingPipe(0,address);
+  radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MAX);
   radio.startListening();
 
@@ -47,7 +53,7 @@ void setup()
   steering.attach(steeringPin);
   gripp.attach(grippPin);
   lift.attach(liftPin);
-  
+
 }
 
 void loop()
