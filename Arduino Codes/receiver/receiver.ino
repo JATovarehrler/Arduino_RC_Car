@@ -33,7 +33,7 @@ RF24 radio(CE, CSN);
 const byte rightMotor = 3; // ENABLE FOR RIGHT MOTOR
 const byte rightMotor_forward = 2;
 const byte rightMotor_backward = 4
-const byte leftMotor = 5; //  ENABLE FOR LEFT MOTOR
+                                 const byte leftMotor = 5; //  ENABLE FOR LEFT MOTOR
 const byte leftMotor_forward = 10;
 const byte leftMotor_backward = 12;
 
@@ -44,6 +44,8 @@ struct robot_pkt {
   int steering;
   int gripper_grip;
   int gripper_height;
+  int left_dir;
+  int right_dir;
 } ;
 struct robot_pkt pkt;
 
@@ -76,9 +78,9 @@ void setup()
 
 void loop()
 {
-  if (radio.available()){
+  if (radio.available()) {
     radio.read(&pkt, sizeof(pkt));
-    
+
     //  PRINT EVERYTHING TO SERIAL PORT
     Serial.print("seq=");
     Serial.print(pkt.sequence);
@@ -92,13 +94,18 @@ void loop()
     Serial.print(pkt.gripper_height);
     Serial.println("");
 
-    //  TRANSMIT INFORMATION TO SERVOS  
+    //  TRANSMIT INFORMATION TO SERVOS
     steering.write(pkt.steering);
     gripper.write(pkt.gripper_grip);
     lift.write(pkt.gripper_height);
 
     //  TRANSMIT INFORMATION TO DC MOTORS
-    analogWrite(rightMotor,pkt.speed);
+    analogWrite(rightMotor, pkt.speed);
+    analogWrite(leftMotor, pkt.speed);
+    digitalWrite(rightMotor_forward, pkt.right_dir);
+    digitalWrite(rightMotor_backward, !(pkt.rigt_dir));
+    digitalWrite(leftMotor_forward, pkt.left_dir);
+    digitalWrite(leftMotor_backward, !(pkt.left_dir));
   }
 
 
