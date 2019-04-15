@@ -93,9 +93,12 @@ void loop()
     Serial.println("");
 
     //  TRANSMIT INFORMATION TO SERVOS  
-    steering.write(steering);
-    gripper.write(gripper_grip);
-    lift.write(gripper_height);
+    steering.write(pkt.steering);
+    gripper.write(pkt.gripper_grip);
+    lift.write(pkt.gripper_height);
+
+    //  TRANSMIT INFORMATION TO DC MOTORS
+    analogWrite(rightMotor,pkt.speed);
   }
 
 
