@@ -37,6 +37,15 @@ const byte leftMotor = 5; //  ENABLE FOR LEFT MOTOR
 const byte leftMotor_forward = 10;
 const byte leftMotor_backward = 12;
 
+//  STRUCTURE TO BE RECEIVED
+struct robot_pkt {
+  unsigned int sequence;
+  int speed;
+  int steering;
+  int gripper_grip;
+  int gripper_height;
+} ;
+struct robot_pkt pkt;
 
 
 void setup()
@@ -67,6 +76,27 @@ void setup()
 
 void loop()
 {
+  if (radio.available()){
+    radio.read(&pkt, sizeof(pkt));
+    
+    //  PRINT EVERYTHING TO SERIAL PORT
+    Serial.print("seq=");
+    Serial.print(pkt.sequence);
+    Serial.print(" speed=");
+    Serial.print(pkt.speed);
+    Serial.print(" steering=");
+    Serial.print(pkt.steering);
+    Serial.print(" gripper_grip=");
+    Serial.print(pkt.gripper_grip);
+    Serial.print(" gripper_height=");
+    Serial.print(pkt.gripper_height);
+    Serial.println("");
+
+    //  TRANSMIT INFORMATION TO SERVOS  
+    steering.write(steering);
+    gripper.write(gripper_grip);
+    lift.write(gripper_height);
+  }
 
 
 }
