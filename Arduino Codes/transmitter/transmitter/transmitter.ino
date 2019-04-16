@@ -73,6 +73,5 @@ void loop()
 
   radio.write(&pkt, sizeof(pkt));
   delay(20);
-  //Serial.println(pkt.gripper_grip);
-  //Serial.println(pkt.gripper_height);
+  
 }
