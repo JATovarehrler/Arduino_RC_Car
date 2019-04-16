@@ -44,8 +44,10 @@ struct robot_pkt {
   int steering;
   int gripper_grip;
   int gripper_height;
-  int left_dir;
-  int right_dir;
+  int left_forward;
+  int right_forward;
+  int left_backward;
+  int right_backward;
 } ;
 struct robot_pkt pkt;
 
@@ -102,10 +104,10 @@ void loop()
     //  TRANSMIT INFORMATION TO DC MOTORS
     analogWrite(rightMotor, pkt.speed);
     analogWrite(leftMotor, pkt.speed);
-    digitalWrite(rightMotor_forward, pkt.right_dir);
-    digitalWrite(rightMotor_backward, !(pkt.rigt_dir));
-    digitalWrite(leftMotor_forward, pkt.left_dir);
-    digitalWrite(leftMotor_backward, !(pkt.left_dir));
+    digitalWrite(rightMotor_forward, pkt.right_forward);
+    digitalWrite(rightMotor_backward, pkt.right_backward);
+    digitalWrite(leftMotor_forward, pkt.left_forward); // IF PKT.LEFT_FORWARD=HIGH, LEFT_BACKWARD=LOW
+    digitalWrite(leftMotor_backward, pkt.left_backward);
   }
 
 
