@@ -17,23 +17,23 @@
 
 // SERVO PINS
 const byte steeringPin = 9;
-const byte grippPin = XXXX;
-const byte liftPin = xxxxx;
+const byte grippPin = 3;
+const byte liftPin = 5;
 
 // SERVOS BEING USED
 Servo steering;
-Servo gripp;
+Servo gripper;
 Servo lift;
 
 // NRF24 MISC
-int address[6] = "00119";
+const byte address[6] = "00119";
 RF24 radio(CE, CSN);
 
 // DC MOTOR PINS
 const byte rightMotor = 3; // ENABLE FOR RIGHT MOTOR
 const byte rightMotor_forward = 2;
-const byte rightMotor_backward = 4
-                                 const byte leftMotor = 5; //  ENABLE FOR LEFT MOTOR
+const byte rightMotor_backward = 4;
+const byte leftMotor = 5; //  ENABLE FOR LEFT MOTOR
 const byte leftMotor_forward = 10;
 const byte leftMotor_backward = 12;
 
@@ -55,7 +55,7 @@ struct robot_pkt pkt;
 void setup()
 {
   //  SERIAL SETUP
-  Serial.begin();
+  Serial.begin(9600);
   while (!Serial);
 
   //  RF24 SETUP
@@ -66,7 +66,7 @@ void setup()
 
   //  SERVOS SETUP
   steering.attach(steeringPin);
-  gripp.attach(grippPin);
+  gripper.attach(grippPin);
   lift.attach(liftPin);
 
   //  DC MOTORS SETUP
@@ -84,7 +84,7 @@ void loop()
     radio.read(&pkt, sizeof(pkt));
 
     //  PRINT EVERYTHING TO SERIAL PORT
-    Serial.print("seq=");
+    /*Serial.print("seq=");
     Serial.print(pkt.sequence);
     Serial.print(" speed=");
     Serial.print(pkt.speed);
@@ -95,7 +95,7 @@ void loop()
     Serial.print(" gripper_height=");
     Serial.print(pkt.gripper_height);
     Serial.println("");
-
+*/
     //  TRANSMIT INFORMATION TO SERVOS
     steering.write(pkt.steering);
     gripper.write(pkt.gripper_grip);
