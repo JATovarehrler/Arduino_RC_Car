@@ -64,6 +64,7 @@ void setup()
   radio.setPALevel(RF24_PA_MAX);
   radio.startListening();
 
+  
   //  SERVOS SETUP
   steering.attach(steeringPin);
   gripper.attach(grippPin);
