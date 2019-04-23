@@ -17,8 +17,8 @@
 
 // SERVO PINS
 const byte steeringPin = 9;
-const byte grippPin = 3;
-const byte liftPin = 5;
+const byte grippPin = 2;
+const byte liftPin = 4;
 
 // SERVOS BEING USED
 Servo steering;
@@ -83,33 +83,18 @@ void loop()
 {
   if (radio.available()) {
     radio.read(&pkt, sizeof(pkt));
-
-    //  PRINT EVERYTHING TO SERIAL PORT
-    /*Serial.print("seq=");
-    Serial.print(pkt.sequence);
-    Serial.print(" speed=");
-    Serial.print(pkt.speed);
-    Serial.print(" steering=");
-    Serial.print(pkt.steering);
-    Serial.print(" gripper_grip=");
-    Serial.print(pkt.gripper_grip);
-    Serial.print(" gripper_height=");
-    Serial.print(pkt.gripper_height);
-    Serial.println("");
-*/
+    
     //  TRANSMIT INFORMATION TO SERVOS
     steering.write(pkt.steering);
     gripper.write(pkt.gripper_grip);
     lift.write(pkt.gripper_height);
 
     //  TRANSMIT INFORMATION TO DC MOTORS
-    analogWrite(rightMotor, pkt.speed);
-    analogWrite(leftMotor, pkt.speed);
+    analogWrite(rightMotor, 255);
+    analogWrite(leftMotor, 255);
     digitalWrite(rightMotor_forward, pkt.right_forward);
     digitalWrite(rightMotor_backward, pkt.right_backward);
     digitalWrite(leftMotor_forward, pkt.left_forward); // IF PKT.LEFT_FORWARD=HIGH, LEFT_BACKWARD=LOW
     digitalWrite(leftMotor_backward, pkt.left_backward);
   }
-
-
 }

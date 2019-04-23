@@ -21,7 +21,7 @@ struct robot_pkt {
   int speed;
   int steering;
   int gripper_grip;
-  int gripper_height;
+  int gripper_height=90;
   int left_forward;
   int right_forward;
   int left_backward;
@@ -33,13 +33,29 @@ struct robot_pkt pkt;
 const byte address[6] = "00119";
 RF24 radio(CE, CSN);
 
-//  POT PINS
-const byte gripPin = 0;
-const byte heightPin = 1;
+//  BUTTON PINS
+const byte upPin = 4;
+const byte downPin = 5;
+const byte fullGrip_pin = 6;
+const byte downGrip_pin = 3;
+
+//  JOYSTICK PINS
+const byte Vx = 0;
+const byte Vy = 3;
+const byte Sw = 2;
+
+//  LED PIN
+const byte LED = 9;
 
 //  GLOBAL VARIABLES
 int seq = 0;
 
+//  DEBOUNCING STATES
+byte upStateOld;
+byte downStateOld;
+
+//  INIT
+int bs = 0;
 
 void setup()
 {
@@ -53,25 +69,41 @@ void setup()
   radio.setPALevel(RF24_PA_MAX);
   radio.stopListening();
 
-  //  INITIAL VALUES
-  pkt.gripper_grip = 90;
-  pkt.gripper_height = 90;
+  
+
 
   //  PIN DECLARATIONS
-  pinMode(gripPin, INPUT);
-  pinMode(heightPin, INPUT);
+  pinMode(upPin, INPUT_PULLUP);
+  pinMode(downPin, INPUT_PULLUP);
+  pinMode(fullGrip_pin, INPUT_PULLUP);
+  pinMode(Sw, INPUT_PULLUP);
 }
 
 void loop()
 {
   seq++;
   pkt.sequence = seq;
-  pkt.gripper_grip = analogRead(gripPin);
-  pkt.gripper_grip = map(pkt.gripper_grip, 0, 1023, 0, 170);
-  pkt.gripper_height = analogRead(heightPin);
-  pkt.gripper_height = map(pkt.gripper_height, 0, 1023, 0, 170);
 
+  //  CURRENT STATES FOR BUTTONS
+  int upState;
+  upState = digitalRead(upPin);
+  int downState;
+  downState = digitalRead(downPin);
+
+  //  LOGIC
+  if ((upState == LOW) && (upStateOld == HIGH)) {
+    pkt.gripper_height = (pkt.gripper_height) + 10;
+    bs=bs++;
+    if (pkt.gripper_height > 180) {
+      pkt.gripper_height = 180;
+    }
+  }
+   upStateOld = digitalRead(upPin);
+
+  int height=analogRead(Vy);
+int   y=map(height,0,1023,0,180);
+  pkt.gripper_height=y;
+ Serial.println(y);
   radio.write(&pkt, sizeof(pkt));
   delay(20);
-  
 }
