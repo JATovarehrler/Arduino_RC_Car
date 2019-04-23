@@ -31,11 +31,11 @@ RF24 radio(CE, CSN);
 
 // DC MOTOR PINS
 const byte rightMotor = 3; // ENABLE FOR RIGHT MOTOR
-const byte rightMotor_forward = 2;
-const byte rightMotor_backward = 4;
+const byte rightMotor_forward = A0;
+const byte rightMotor_backward = A1;
 const byte leftMotor = 5; //  ENABLE FOR LEFT MOTOR
-const byte leftMotor_forward = 10;
-const byte leftMotor_backward = 12;
+const byte leftMotor_forward = A2;
+const byte leftMotor_backward = A3;
 
 //  STRUCTURE TO BE RECEIVED
 struct robot_pkt {
@@ -63,7 +63,7 @@ void setup()
   radio.setPALevel(RF24_PA_MAX);
   radio.startListening();
 
-  
+
   //  SERVOS SETUP
   steering.attach(steeringPin);
   gripper.attach(grippPin);
@@ -82,7 +82,7 @@ void loop()
 {
   if (radio.available()) {
     radio.read(&pkt, sizeof(pkt));
-    
+
     //  TRANSMIT INFORMATION TO SERVOS
     steering.write(pkt.steering);
     gripper.write(pkt.gripper_grip);

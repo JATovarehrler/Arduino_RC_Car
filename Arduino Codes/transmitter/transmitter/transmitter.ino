@@ -35,19 +35,13 @@ RF24 radio(CE, CSN);
 //  BUTTON PINS
 const byte upPin = 4;
 const byte downPin = 5;
-const byte fullGrip_pin = 6;
-const byte downGrip_pin = 3;
+const byte fullGrip_pin = 3;
+const byte downGrip_pin = 6;
 
 //  JOYSTICK PINS
 const byte Vx = 0;
-const byte Vy = 3;
+const byte Vy = 1;
 const byte Sw = 2;
-
-//  LED PIN
-const byte LED = 9;
-
-//  GLOBAL VARIABLES
-int seq = 0;
 
 //  DEBOUNCING STATES
 byte upStateOld;
@@ -74,6 +68,17 @@ void setup()
 
 void loop()
 {
+  //  GET RETURNS FROM FUNCTIONS
+  pkt.gripper_height=height_control();
+  //  TRANSMIT RADIO SIGNALS
+  radio.write(&pkt, sizeof(pkt));
+  delay(20);
+}
+
+int height_control()  //  FUNCTION TO CONTROL THE HEIGHT OF THE GRIPPER
+{
+  //  INITIAL VARIABLES
+  int gripper_height = 90;
   //  CURRENT STATES FOR BUTTONS
   int upState;
   upState = digitalRead(upPin);
@@ -82,26 +87,23 @@ void loop()
 
   //  UP BUTTON LOGIC AND DEBOUNCE
   if ((upState == LOW) && (upStateOld == HIGH)) {
-    pkt.gripper_height = (pkt.gripper_height) + 10; //  ADD TEN DEGREES
+    gripper_height = gripper_height + 10; //  ADD TEN DEGREES
 
-    if (pkt.gripper_height > 180) {
-      pkt.gripper_height = 180;
+    if (gripper_height > 180) {
+      gripper_height = 180;
     }
   }
   upStateOld = digitalRead(upPin); //  DEBOUNCE
 
   //  DOWN BUTTON LOGIC AND DEBOUNCE
   if ((downState == LOW) && (downStateOld == HIGH)) {
-    pkt.gripper_height = pkt.gripper_height - 10; //  SUBTRACT 10 DEGREES
+    gripper_height = gripper_height - 10; //  SUBTRACT 10 DEGREES
 
-    if (pkt.gripper_height > 180) {
-      pkt.gripper_height = 180;
+    if (gripper_height > 180) {
+      gripper_height = 180;
     }
   }
-  downStateOld=digitalRead(downPin);  //  DEBOUNCE
+  downStateOld = digitalRead(downPin); //  DEBOUNCE
 
-
-  //  TRANSMIT RADIO SIGNALS
-  radio.write(&pkt, sizeof(pkt));
-  delay(20);
+  return gripper_height;
 }
