@@ -17,11 +17,10 @@
 
 //  STRUCTURE TO BE RECEIVED
 struct robot_pkt {
-  unsigned int sequence;
   int speed;
   int steering;
   int gripper_grip;
-  int gripper_height=90;
+  int gripper_height;
   int left_forward;
   int right_forward;
   int left_backward;
@@ -54,9 +53,6 @@ int seq = 0;
 byte upStateOld;
 byte downStateOld;
 
-//  INIT
-int bs = 0;
-
 void setup()
 {
   // SERIAL SETUP
@@ -69,9 +65,6 @@ void setup()
   radio.setPALevel(RF24_PA_MAX);
   radio.stopListening();
 
-  
-
-
   //  PIN DECLARATIONS
   pinMode(upPin, INPUT_PULLUP);
   pinMode(downPin, INPUT_PULLUP);
@@ -81,29 +74,34 @@ void setup()
 
 void loop()
 {
-  seq++;
-  pkt.sequence = seq;
-
   //  CURRENT STATES FOR BUTTONS
   int upState;
   upState = digitalRead(upPin);
   int downState;
   downState = digitalRead(downPin);
 
-  //  LOGIC
+  //  UP BUTTON LOGIC AND DEBOUNCE
   if ((upState == LOW) && (upStateOld == HIGH)) {
-    pkt.gripper_height = (pkt.gripper_height) + 10;
-    bs=bs++;
+    pkt.gripper_height = (pkt.gripper_height) + 10; //  ADD TEN DEGREES
+
     if (pkt.gripper_height > 180) {
       pkt.gripper_height = 180;
     }
   }
-   upStateOld = digitalRead(upPin);
+  upStateOld = digitalRead(upPin); //  DEBOUNCE
 
-  int height=analogRead(Vy);
-int   y=map(height,0,1023,0,180);
-  pkt.gripper_height=y;
- Serial.println(y);
+  //  DOWN BUTTON LOGIC AND DEBOUNCE
+  if ((downState == LOW) && (downStateOld == HIGH)) {
+    pkt.gripper_height = pkt.gripper_height - 10; //  SUBTRACT 10 DEGREES
+
+    if (pkt.gripper_height > 180) {
+      pkt.gripper_height = 180;
+    }
+  }
+  downStateOld=digitalRead(downPin);  //  DEBOUNCE
+
+
+  //  TRANSMIT RADIO SIGNALS
   radio.write(&pkt, sizeof(pkt));
   delay(20);
 }

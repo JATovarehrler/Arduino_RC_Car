@@ -39,7 +39,6 @@ const byte leftMotor_backward = 12;
 
 //  STRUCTURE TO BE RECEIVED
 struct robot_pkt {
-  unsigned int sequence;
   int speed;
   int steering;
   int gripper_grip;
@@ -90,8 +89,8 @@ void loop()
     lift.write(pkt.gripper_height);
 
     //  TRANSMIT INFORMATION TO DC MOTORS
-    analogWrite(rightMotor, 255);
-    analogWrite(leftMotor, 255);
+    analogWrite(rightMotor, pkt.speed);
+    analogWrite(leftMotor, pkt.speed);
     digitalWrite(rightMotor_forward, pkt.right_forward);
     digitalWrite(rightMotor_backward, pkt.right_backward);
     digitalWrite(leftMotor_forward, pkt.left_forward); // IF PKT.LEFT_FORWARD=HIGH, LEFT_BACKWARD=LOW
