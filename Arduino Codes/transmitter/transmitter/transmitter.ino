@@ -49,6 +49,8 @@ byte downStateOld;
 byte leftStateOld;
 byte rightStateOld;
 
+//  GLOBAL VARIABLES FOR FUNCTIONS
+byte backwards;
 void setup()
 {
   // SERIAL SETUP
@@ -79,9 +81,20 @@ void loop()
   pkt.gripper_height = height_control();
   pkt.gripper_grip = grip_control();
   pkt.steering = steering_control();
+  pkt.speed = speed_control();
+  pkt.left_backward=reverse();
+  pkt.right_backward=reverse();
+  pkt.left_forward=!reverse();
+  pkt.right_forward=!reverse();
+
+  
   //  TRANSMIT RADIO SIGNALS
   radio.write(&pkt, sizeof(pkt));
   delay(20);
+
+  Serial.println("height="+pkt.gripper_height);
+  Serial.println("grip="+pkt.gripper_grip);
+  Serial.println("steering="+pkt.steering);
 }
 
 //  FUNCTIONS
@@ -207,4 +220,21 @@ int speed_control()  //  THIS SHOULD RETURN THE DISTANCE OF THE JOYSTICK FROM RE
     pkt.speed = sqrt(pow(Xval, 2) + pow(Yval, 2));
   }
   return pkt.speed;
+}
+
+byte reverse()
+{
+  //  VALUES FOR X AND Y
+  int Xval = Xval_readout();
+  int Yval = Yval_readout();
+
+  //  ROTATION LOGIC
+  if (Yval>516){
+    backwards=HIGH;
+  }
+  else {
+    backwards=LOW;
+  }
+
+  return backwards;
 }
