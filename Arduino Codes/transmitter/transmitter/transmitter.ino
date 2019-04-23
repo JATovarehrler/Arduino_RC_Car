@@ -39,9 +39,9 @@ const byte fullGrip_pin = 3;
 const byte noGrip_pin = 6;
 
 //  JOYSTICK PINS
-const byte Vx = 0;
-const byte Vy = 1;
-const byte Sw = 2;
+const byte Xpin = A0;
+const byte Ypin = A1;
+const byte Sw = A2;
 
 //  DEBOUNCING STATES
 byte upStateOld;
@@ -61,11 +61,15 @@ void setup()
   radio.setPALevel(RF24_PA_MAX);
   radio.stopListening();
 
-  //  PIN DECLARATIONS
+  //  BUTTON PIN DECLARATIONS
   pinMode(upPin, INPUT_PULLUP);
   pinMode(downPin, INPUT_PULLUP);
   pinMode(fullGrip_pin, INPUT_PULLUP);
   pinMode(noGrip_pin, INPUT_PULLUP);
+
+  //  JOYSTICK PIN DECLARATIONS
+  pinMode(Ypin, INPUT);
+  pinMode(Xpin, INPUT);
   pinMode(Sw, INPUT_PULLUP);
 }
 
@@ -130,4 +134,14 @@ int grip_control() //  FUNCTION TO CONTROL THE GRIPP LEVEL
     pkt.gripper_grip = 0;
   }
   leftStateOld = digitalRead(noGrip_pin); //  DEBOUNCE
+}
+
+int Xval_readout()
+{
+  //  USED VARIABLES
+  int Xval;
+  Xval=analogRead(Xpin);
+  Xval=map(Xval,0,1023,0,255);  //  THIS NEEDS TO BE REMAPED FOR STEERING!!
+  return Xval;
+  
 }
