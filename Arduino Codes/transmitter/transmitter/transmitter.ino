@@ -36,7 +36,7 @@ RF24 radio(CE, CSN);
 const byte upPin = 4;
 const byte downPin = 5;
 const byte fullGrip_pin = 3;
-const byte downGrip_pin = 6;
+const byte noGrip_pin = 6;
 
 //  JOYSTICK PINS
 const byte Vx = 0;
@@ -46,6 +46,8 @@ const byte Sw = 2;
 //  DEBOUNCING STATES
 byte upStateOld;
 byte downStateOld;
+byte leftStateOld;
+byte rightStateOld;
 
 void setup()
 {
@@ -63,22 +65,23 @@ void setup()
   pinMode(upPin, INPUT_PULLUP);
   pinMode(downPin, INPUT_PULLUP);
   pinMode(fullGrip_pin, INPUT_PULLUP);
+  pinMode(noGrip_pin, INPUT_PULLUP);
   pinMode(Sw, INPUT_PULLUP);
 }
 
 void loop()
 {
   //  GET RETURNS FROM FUNCTIONS
-  pkt.gripper_height=height_control();
+  pkt.gripper_height = height_control();
+  pkt.gripper_grip = grip_control();
   //  TRANSMIT RADIO SIGNALS
   radio.write(&pkt, sizeof(pkt));
   delay(20);
 }
 
+//  FUNCTIONS
 int height_control()  //  FUNCTION TO CONTROL THE HEIGHT OF THE GRIPPER
 {
-  //  INITIAL VARIABLES
-  int gripper_height = 90;
   //  CURRENT STATES FOR BUTTONS
   int upState;
   upState = digitalRead(upPin);
@@ -87,23 +90,44 @@ int height_control()  //  FUNCTION TO CONTROL THE HEIGHT OF THE GRIPPER
 
   //  UP BUTTON LOGIC AND DEBOUNCE
   if ((upState == LOW) && (upStateOld == HIGH)) {
-    gripper_height = gripper_height + 10; //  ADD TEN DEGREES
+    pkt.gripper_height = pkt.gripper_height + 10; //  ADD TEN DEGREES
 
-    if (gripper_height > 180) {
-      gripper_height = 180;
+    if (pkt.gripper_height > 180) {
+      pkt.gripper_height = 180;
     }
   }
   upStateOld = digitalRead(upPin); //  DEBOUNCE
 
   //  DOWN BUTTON LOGIC AND DEBOUNCE
   if ((downState == LOW) && (downStateOld == HIGH)) {
-    gripper_height = gripper_height - 10; //  SUBTRACT 10 DEGREES
+    pkt.gripper_height = pkt.gripper_height - 10; //  SUBTRACT 10 DEGREES
 
-    if (gripper_height > 180) {
-      gripper_height = 180;
+    if (pkt.gripper_height > 180) {
+      pkt.gripper_height = 180;
     }
   }
   downStateOld = digitalRead(downPin); //  DEBOUNCE
 
-  return gripper_height;
+  return pkt.gripper_height;
+}
+
+int grip_control() //  FUNCTION TO CONTROL THE GRIPP LEVEL
+{
+  //  CURRENT STATE FOR BUTTONS
+  int rightState;
+  rightState = digitalRead(fullGrip_pin);
+  int leftState;
+  leftState = digitalRead(noGrip_pin);
+
+  //  FULL GRIP LOGIC AND DEBOUNCE
+  if ((rightState == LOW) && (rightStateOld == HIGH)) {
+    pkt.gripper_grip = 160;
+  }
+  rightStateOld = digitalRead(fullGrip_pin); //  DEBOUNCE
+
+  //  NO GRIP LOGIC AND DEBOUNCE
+  if ((leftState == LOW) && (leftStateOld == HIGH)) {
+    pkt.gripper_grip = 0;
+  }
+  leftStateOld = digitalRead(noGrip_pin); //  DEBOUNCE
 }
