@@ -160,21 +160,51 @@ int steering_control()
   int Yval = Yval_readout();
 
   //  STEERING LOGIC
-  if ((Xval > 516) && (Yval > 516)) { //  FIRST QUADRANT
+  if ((Xval > 516) && (Yval < 516)) { //  FIRST QUADRANT
     pkt.steering = atan(Yval / Xval);
     pkt.steering = map(pkt.steering, 0, 180, 80, 103);
   }
-  if ((Xval < 516) && (Yval > 516)) { //  SECOND QUADRANT
+  if ((Xval < 516) && (Yval < 516)) { //  SECOND QUADRANT
     pkt.steering = atan(Yval / Xval);
     pkt.steering = map(pkt.steering, 0, 180, 103, 120);
   }
-  if ((Xval < 516) && (Yval < 516)) { //  THIRD QUADRANT
+  if ((Xval < 516) && (Yval > 516)) { //  THIRD QUADRANT
     pkt.steering = atan(Yval / Xval);
-    pkt.steering = map(pkt.steering, 0, 180,103,120);
+    pkt.steering = map(pkt.steering, 0, 180, 103, 120);
   }
-  if ((Xval > 516) && (Yval < 516)) { //  FOURTH QUADRANT
+  if ((Xval > 516) && (Yval > 516)) { //  FOURTH QUADRANT
     pkt.steering = atan(Yval / Xval);
-    pkt.steering = map(pkt.steering, 0, 180,80,103);
+    pkt.steering = map(pkt.steering, 0, 180, 80, 103);
   }
   return pkt.steering;
+}
+
+int speed_control()  //  THIS SHOULD RETURN THE DISTANCE OF THE JOYSTICK FROM RESTING POSITION
+{
+  //  VALUES FOR X AND Y
+  int Xval = Xval_readout();
+  int Yval = Yval_readout();
+
+  //  SPEED LOGIC
+  if ((Xval > 516) && (Yval < 516)) { //  FIRST QUADRANT
+    Xval = map(Xval, 516, 1023, 0, 255);
+    Yval = map(Yval, 0, 516, 0, 255);
+    pkt.speed = sqrt(pow(Xval, 2) + pow(Yval, 2));
+  }
+  if ((Xval < 516) && (Yval < 516)) { //  SECOND QUADRANT
+    Xval = map(Xval, 0, 516, 0, 255);
+    Yval = map(Yval, 0, 516, 0, 255);
+    pkt.speed = sqrt(pow(Xval, 2) + pow(Yval, 2));
+  }
+  if ((Xval < 516) && (Yval > 516)) { //  THIRD QUADRANT
+    Xval = map(Xval, 0, 516, 0, 255);
+    Yval = map(Yval, 516, 1023, 0, 255);
+    pkt.speed = sqrt(pow(Xval, 2) + pow(Yval, 2));
+  }
+  if ((Xval > 516) && (Yval > 516)) { //  FOURTH QUADRANT
+    Xval = map(Xval, 516, 1023, 0, 255);
+    Yval = map(Yval, 516, 1023, 0, 255);
+    pkt.speed = sqrt(pow(Xval, 2) + pow(Yval, 2));
+  }
+  return pkt.speed;
 }
