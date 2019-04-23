@@ -142,7 +142,6 @@ int Xval_readout()  //  FUNCTION TO READ X VALUES FROM JOYSTICK
   //  USED VARIABLES
   int Xval;
   Xval = analogRead(Xpin);
-  Xval = map(Xval, 0, 1023, 0, 255); //  THIS NEEDS TO BE REMAPED FOR STEERING!!
   return Xval;
 
 }
@@ -151,7 +150,6 @@ int Yval_readout()  //  FUNCTION TO READ Y VALUES FROM JOYSTICK
 {
   int Yval;
   Yval = analogRead(Ypin);
-  Yval = map(Yval, 0, 1023, 0, 255); //  THIS NEEDS TO BE REMAPED FOR STEERING!!
   return Yval;
 }
 
@@ -160,10 +158,23 @@ int steering_control()
   //  VARIABLES BEING USED
   int Xval = Xval_readout();
   int Yval = Yval_readout();
-  Xval = map(Xval, 0, 255, 80, 120);
-  Yval = map(Yval, 0, 255, 80, 120);
 
-  //  STEERING LOGIC?
-
+  //  STEERING LOGIC
+  if ((Xval > 516) && (Yval > 516)) { //  FIRST QUADRANT
+    pkt.steering = atan(Yval / Xval);
+    pkt.steering = map(pkt.steering, 0, 180, 80, 103);
+  }
+  if ((Xval < 516) && (Yval > 516)) { //  SECOND QUADRANT
+    pkt.steering = atan(Yval / Xval);
+    pkt.steering = map(pkt.steering, 0, 180, 103, 120);
+  }
+  if ((Xval < 516) && (Yval < 516)) { //  THIRD QUADRANT
+    pkt.steering = atan(Yval / Xval);
+    pkt.steering = map(pkt.steering, 0, 180,103,120);
+  }
+  if ((Xval > 516) && (Yval < 516)) { //  FOURTH QUADRANT
+    pkt.steering = atan(Yval / Xval);
+    pkt.steering = map(pkt.steering, 0, 180,80,103);
+  }
   return pkt.steering;
 }
