@@ -78,6 +78,7 @@ void loop()
   //  GET RETURNS FROM FUNCTIONS
   pkt.gripper_height = height_control();
   pkt.gripper_grip = grip_control();
+  pkt.steering = steering_control();
   //  TRANSMIT RADIO SIGNALS
   radio.write(&pkt, sizeof(pkt));
   delay(20);
@@ -136,12 +137,33 @@ int grip_control() //  FUNCTION TO CONTROL THE GRIPP LEVEL
   leftStateOld = digitalRead(noGrip_pin); //  DEBOUNCE
 }
 
-int Xval_readout()
+int Xval_readout()  //  FUNCTION TO READ X VALUES FROM JOYSTICK
 {
   //  USED VARIABLES
   int Xval;
-  Xval=analogRead(Xpin);
-  Xval=map(Xval,0,1023,0,255);  //  THIS NEEDS TO BE REMAPED FOR STEERING!!
+  Xval = analogRead(Xpin);
+  Xval = map(Xval, 0, 1023, 0, 255); //  THIS NEEDS TO BE REMAPED FOR STEERING!!
   return Xval;
-  
+
+}
+
+int Yval_readout()  //  FUNCTION TO READ Y VALUES FROM JOYSTICK
+{
+  int Yval;
+  Yval = analogRead(Ypin);
+  Yval = map(Yval, 0, 1023, 0, 255); //  THIS NEEDS TO BE REMAPED FOR STEERING!!
+  return Yval;
+}
+
+int steering_control()
+{
+  //  VARIABLES BEING USED
+  int Xval = Xval_readout();
+  int Yval = Yval_readout();
+  Xval = map(Xval, 0, 255, 80, 120);
+  Yval = map(Yval, 0, 255, 80, 120);
+
+  //  STEERING LOGIC?
+
+  return pkt.steering;
 }
