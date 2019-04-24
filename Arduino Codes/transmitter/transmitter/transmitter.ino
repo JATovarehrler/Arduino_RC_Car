@@ -19,7 +19,7 @@
 struct robot_pkt {
   int speed;
   int steering = 103;
-  int gripper_grip=60;
+  int gripper_grip = 60;
   int gripper_height = 90;
   int left_forward;
   int right_forward;
@@ -57,8 +57,8 @@ int forwards;
 void setup()
 {
   // SERIAL SETUP
- //Serial.begin(9600);
- 
+  //Serial.begin(9600);
+
   //Serial.print("Hi, this is your awful creation!");
 
   // RF24 SETUP
@@ -92,18 +92,18 @@ void loop()
   pkt.left_forward = forward();
   pkt.right_forward = forward();
 
-//Serial.println(pkt.steering);
-//Serial.println(pkt.speed);
+  //Serial.println(pkt.steering);
+  //Serial.println(pkt.speed);
 
-//Serial.println("right forward=");
-//Serial.println(pkt.right_backward);
+  //Serial.println("right forward=");
+  //Serial.println(pkt.right_backward);
   //  TRANSMIT RADIO SIGNALS
   radio.write(&pkt, sizeof(pkt));
   delay(20);
 
 
 
-  
+
 }
 
 //  FUNCTIONS
@@ -135,10 +135,11 @@ int height_control()  //  FUNCTION TO CONTROL THE HEIGHT OF THE GRIPPER
   }
   downStateOld = digitalRead(downPin); //  DEBOUNCE
 
+  pkt.gripper_height = constrain(pkt.gripper_height, 60, 160);
   return pkt.gripper_height;
 }
 
-int grip_control() //  FUNCTION TO CONTROL THE GRIPP LEVEL
+int grip_control() //  FUNCTION TO CONTROL THE GRIP LEVEL
 {
   //  CURRENT STATE FOR BUTTONS
   int rightState;
@@ -157,6 +158,7 @@ int grip_control() //  FUNCTION TO CONTROL THE GRIPP LEVEL
     pkt.gripper_grip = 0;
   }
   leftStateOld = digitalRead(noGrip_pin); //  DEBOUNCE
+  return pkt.gripper_grip;
 }
 
 int Xval_readout()  //  FUNCTION TO READ X VALUES FROM JOYSTICK
@@ -175,30 +177,30 @@ int Yval_readout()  //  FUNCTION TO READ Y VALUES FROM JOYSTICK
   return Yval;
 }
 
-int steering_control()
+int steering_control()  //  FUNCTION TO CONTROL STEERING ANGLE
 {
   //  VALUES FOR X
   int Xval = Xval_readout();
 
   //  STEERING LOGIC
   pkt.steering = map(Xval, 0, 1023, 45, 135);
-  pkt.steering=constrain(pkt.steering,68,112);
+  pkt.steering = constrain(pkt.steering, 68, 112);
   return pkt.steering;
 }
 
-int speed_control()  
+int speed_control() //  FUNCTION TO CONTROL SPEED
 {
   //  VALUES FOR Y
   int Yval = Yval_readout();
 
   //  SPEED LOGIC
-  pkt.speed=Yval - 512 ;
+  pkt.speed = Yval - 512 ;
   pkt.speed = abs(constrain(pkt.speed, -512, 512));
   pkt.speed = map(pkt.speed, 0, 512, 0, 255);
   return pkt.speed;
 }
 
-int reverse()
+int reverse() //  FUNCTION TO CONTROL DIRECTION
 {
   //  VALUES FOR Y
   int Yval = Yval_readout();
@@ -214,15 +216,15 @@ int reverse()
   return backwards;
 }
 
-int forward()
+int forward() //  FUNCTION TO CONTROL DIRECTION
 {
-  int Yval=Yval_readout();
+  int Yval = Yval_readout();
 
-  if (Yval<516){
-    forwards=255;
+  if (Yval < 516) {
+    forwards = 255;
   }
-  else{
-    forwards=0;
+  else {
+    forwards = 0;
   }
   return forwards;
 }
