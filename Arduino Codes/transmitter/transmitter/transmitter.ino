@@ -18,9 +18,9 @@
 //  STRUCTURE TO BE RECEIVED
 struct robot_pkt {
   int speed;
-  int steering;
-  int gripper_grip;
-  int gripper_height;
+  int steering = 103;
+  int gripper_grip=60;
+  int gripper_height = 90;
   int left_forward;
   int right_forward;
   int left_backward;
@@ -30,7 +30,7 @@ struct robot_pkt pkt;
 
 //  NRF24 MISC
 const byte address[6] = "00119";
-RF24 radio(CE, CSN);
+RF24 radio(7, 8);
 
 //  BUTTON PINS
 const byte upPin = 4;
@@ -50,17 +50,22 @@ byte leftStateOld;
 byte rightStateOld;
 
 //  GLOBAL VARIABLES FOR FUNCTIONS
-byte backwards;
+int backwards;
+int forwards;
+
+
 void setup()
 {
   // SERIAL SETUP
-  Serial.begin(9600);
-  while (!Serial);
+ //Serial.begin(9600);
+ 
+  //Serial.print("Hi, this is your awful creation!");
 
   // RF24 SETUP
   radio.begin();
   radio.openWritingPipe(address);
   radio.setPALevel(RF24_PA_MAX);
+  radio.setDataRate(RF24_1MBPS);      // set data rate through the air
   radio.stopListening();
 
   //  BUTTON PIN DECLARATIONS
@@ -70,8 +75,8 @@ void setup()
   pinMode(noGrip_pin, INPUT_PULLUP);
 
   //  JOYSTICK PIN DECLARATIONS
-  pinMode(Ypin, INPUT);
-  pinMode(Xpin, INPUT);
+  //pinMode(Ypin, INPUT);
+  //pinMode(Xpin, INPUT);
   pinMode(Sw, INPUT_PULLUP);
 }
 
@@ -82,19 +87,23 @@ void loop()
   pkt.gripper_grip = grip_control();
   pkt.steering = steering_control();
   pkt.speed = speed_control();
-  pkt.left_backward=reverse();
-  pkt.right_backward=reverse();
-  pkt.left_forward=!reverse();
-  pkt.right_forward=!reverse();
+  pkt.left_backward = reverse();
+  pkt.right_backward = reverse();
+  pkt.left_forward = forward();
+  pkt.right_forward = forward();
 
-  
+//Serial.println(pkt.steering);
+//Serial.println(pkt.speed);
+
+//Serial.println("right forward=");
+//Serial.println(pkt.right_backward);
   //  TRANSMIT RADIO SIGNALS
   radio.write(&pkt, sizeof(pkt));
   delay(20);
 
-  Serial.println("height="+pkt.gripper_height);
-  Serial.println("grip="+pkt.gripper_grip);
-  Serial.println("steering="+pkt.steering);
+
+
+  
 }
 
 //  FUNCTIONS
@@ -168,73 +177,52 @@ int Yval_readout()  //  FUNCTION TO READ Y VALUES FROM JOYSTICK
 
 int steering_control()
 {
-  //  VARIABLES BEING USED
+  //  VALUES FOR X
   int Xval = Xval_readout();
-  int Yval = Yval_readout();
 
   //  STEERING LOGIC
-  if ((Xval > 516) && (Yval < 516)) { //  FIRST QUADRANT
-    pkt.steering = atan(Yval / Xval);
-    pkt.steering = map(pkt.steering, 0, 180, 80, 103);
-  }
-  if ((Xval < 516) && (Yval < 516)) { //  SECOND QUADRANT
-    pkt.steering = atan(Yval / Xval);
-    pkt.steering = map(pkt.steering, 0, 180, 103, 120);
-  }
-  if ((Xval < 516) && (Yval > 516)) { //  THIRD QUADRANT
-    pkt.steering = atan(Yval / Xval);
-    pkt.steering = map(pkt.steering, 0, 180, 103, 120);
-  }
-  if ((Xval > 516) && (Yval > 516)) { //  FOURTH QUADRANT
-    pkt.steering = atan(Yval / Xval);
-    pkt.steering = map(pkt.steering, 0, 180, 80, 103);
-  }
+  pkt.steering = map(Xval, 0, 1023, 45, 135);
+  pkt.steering=constrain(pkt.steering,68,112);
   return pkt.steering;
 }
 
-int speed_control()  //  THIS SHOULD RETURN THE DISTANCE OF THE JOYSTICK FROM RESTING POSITION
+int speed_control()  
 {
-  //  VALUES FOR X AND Y
-  int Xval = Xval_readout();
+  //  VALUES FOR Y
   int Yval = Yval_readout();
 
   //  SPEED LOGIC
-  if ((Xval > 516) && (Yval < 516)) { //  FIRST QUADRANT
-    Xval = map(Xval, 516, 1023, 0, 255);
-    Yval = map(Yval, 0, 516, 0, 255);
-    pkt.speed = sqrt(pow(Xval, 2) + pow(Yval, 2));
-  }
-  if ((Xval < 516) && (Yval < 516)) { //  SECOND QUADRANT
-    Xval = map(Xval, 0, 516, 0, 255);
-    Yval = map(Yval, 0, 516, 0, 255);
-    pkt.speed = sqrt(pow(Xval, 2) + pow(Yval, 2));
-  }
-  if ((Xval < 516) && (Yval > 516)) { //  THIRD QUADRANT
-    Xval = map(Xval, 0, 516, 0, 255);
-    Yval = map(Yval, 516, 1023, 0, 255);
-    pkt.speed = sqrt(pow(Xval, 2) + pow(Yval, 2));
-  }
-  if ((Xval > 516) && (Yval > 516)) { //  FOURTH QUADRANT
-    Xval = map(Xval, 516, 1023, 0, 255);
-    Yval = map(Yval, 516, 1023, 0, 255);
-    pkt.speed = sqrt(pow(Xval, 2) + pow(Yval, 2));
-  }
+  pkt.speed=Yval - 512 ;
+  pkt.speed = abs(constrain(pkt.speed, -512, 512));
+  pkt.speed = map(pkt.speed, 0, 512, 0, 255);
   return pkt.speed;
 }
 
-byte reverse()
+int reverse()
 {
-  //  VALUES FOR X AND Y
-  int Xval = Xval_readout();
+  //  VALUES FOR Y
   int Yval = Yval_readout();
 
   //  ROTATION LOGIC
-  if (Yval>516){
-    backwards=HIGH;
+  if (Yval > 516) {
+    backwards = 255;
   }
   else {
-    backwards=LOW;
+    backwards = 0;
   }
 
   return backwards;
+}
+
+int forward()
+{
+  int Yval=Yval_readout();
+
+  if (Yval<516){
+    forwards=255;
+  }
+  else{
+    forwards=0;
+  }
+  return forwards;
 }
