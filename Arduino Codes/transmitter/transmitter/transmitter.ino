@@ -41,13 +41,14 @@ const byte noGrip_pin = 6;
 //  JOYSTICK PINS
 const byte Xpin = A0;
 const byte Ypin = A1;
-const byte Sw = A2;
+const byte Sw = 2;
 
 //  DEBOUNCING STATES
 byte upStateOld;
 byte downStateOld;
 byte leftStateOld;
 byte rightStateOld;
+byte joyStateOld;
 
 //  GLOBAL VARIABLES FOR FUNCTIONS
 int backwards;
@@ -82,28 +83,18 @@ void setup()
 
 void loop()
 {
-  //  GET RETURNS FROM FUNCTIONS
-  pkt.gripper_height = height_control();
-  pkt.gripper_grip = grip_control();
-  pkt.steering = steering_control();
-  pkt.speed = speed_control();
+  pkt.gripper_height=height_control();
+  pkt.gripper_grip=grip_control();
+  pkt.steering=steering_control();
+  pkt.speed=speed_control();
   pkt.left_backward = reverse();
   pkt.right_backward = reverse();
   pkt.left_forward = forward();
   pkt.right_forward = forward();
 
-  //Serial.println(pkt.steering);
-  //Serial.println(pkt.speed);
-
-  //Serial.println("right forward=");
-  //Serial.println(pkt.right_backward);
-  //  TRANSMIT RADIO SIGNALS
+  //Serial.println(pkt.gripper_height);
   radio.write(&pkt, sizeof(pkt));
   delay(20);
-
-
-
-
 }
 
 //  FUNCTIONS
@@ -129,14 +120,15 @@ int height_control()  //  FUNCTION TO CONTROL THE HEIGHT OF THE GRIPPER
   if ((downState == LOW) && (downStateOld == HIGH)) {
     pkt.gripper_height = pkt.gripper_height - 10; //  SUBTRACT 10 DEGREES
 
-    if (pkt.gripper_height > 180) {
+    if (pkt.gripper_height >180) {
       pkt.gripper_height = 180;
     }
   }
   downStateOld = digitalRead(downPin); //  DEBOUNCE
 
-  pkt.gripper_height = constrain(pkt.gripper_height, 60, 160);
+  pkt.gripper_height = constrain(pkt.gripper_height, 60, 100);
   return pkt.gripper_height;
+
 }
 
 int grip_control() //  FUNCTION TO CONTROL THE GRIP LEVEL
@@ -146,10 +138,12 @@ int grip_control() //  FUNCTION TO CONTROL THE GRIP LEVEL
   rightState = digitalRead(fullGrip_pin);
   int leftState;
   leftState = digitalRead(noGrip_pin);
+  int joyState;
+  joyState=digitalRead(2);
 
   //  FULL GRIP LOGIC AND DEBOUNCE
   if ((rightState == LOW) && (rightStateOld == HIGH)) {
-    pkt.gripper_grip = 160;
+    pkt.gripper_grip = 145;
   }
   rightStateOld = digitalRead(fullGrip_pin); //  DEBOUNCE
 
@@ -158,7 +152,15 @@ int grip_control() //  FUNCTION TO CONTROL THE GRIP LEVEL
     pkt.gripper_grip = 0;
   }
   leftStateOld = digitalRead(noGrip_pin); //  DEBOUNCE
+
+  if ((joyState == LOW) && (joyStateOld == HIGH)) {
+    pkt.gripper_grip = 180;
+  }
+  joyStateOld = digitalRead(2); //  DEBOUNCE
+  delay(15);
+  //pkt.gripper_grip=0;
   return pkt.gripper_grip;
+
 }
 
 int Xval_readout()  //  FUNCTION TO READ X VALUES FROM JOYSTICK
@@ -186,6 +188,7 @@ int steering_control()  //  FUNCTION TO CONTROL STEERING ANGLE
   pkt.steering = map(Xval, 0, 1023, 45, 135);
   pkt.steering = constrain(pkt.steering, 68, 112);
   return pkt.steering;
+
 }
 
 int speed_control() //  FUNCTION TO CONTROL SPEED

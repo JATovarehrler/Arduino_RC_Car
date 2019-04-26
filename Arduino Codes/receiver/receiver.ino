@@ -60,7 +60,7 @@ void setup()
   radio.begin();
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MAX);
-   radio.setDataRate(RF24_1MBPS);      // set data rate through the air
+  radio.setDataRate(RF24_1MBPS);      // set data rate through the air
   radio.startListening();
 
 
@@ -94,12 +94,16 @@ void loop()
     lift.write(pkt.gripper_height);
 
     //  TRANSMIT INFORMATION TO DC MOTORS
-    analogWrite(5, pkt.speed);
-    analogWrite(3, pkt.speed);
     digitalWrite(rightMotor_forward, pkt.right_forward);
     digitalWrite(rightMotor_backward, pkt.right_backward);
     digitalWrite(leftMotor_forward, pkt.left_forward); // IF PKT.LEFT_FORWARD=HIGH, LEFT_BACKWARD=LOW
     digitalWrite(leftMotor_backward, pkt.left_backward);
+
+    //  SPEED RAMP
+    
+      analogWrite(5, pkt.speed);
+      analogWrite(3, pkt.speed);
+    
   }
 
 }
