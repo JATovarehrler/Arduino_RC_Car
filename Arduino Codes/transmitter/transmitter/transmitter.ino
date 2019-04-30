@@ -54,14 +54,7 @@ byte joyStateOld;
 int backwards;
 int forwards;
 
-
-void setup()
-{
-  // SERIAL SETUP
-  //Serial.begin(9600);
-
-  //Serial.print("Hi, this is your awful creation!");
-
+void setup(){
   // RF24 SETUP
   radio.begin();
   radio.openWritingPipe(address);
@@ -81,8 +74,7 @@ void setup()
   pinMode(Sw, INPUT_PULLUP);
 }
 
-void loop()
-{
+void loop(){
   pkt.gripper_height=height_control();
   pkt.gripper_grip=grip_control();
   pkt.steering=steering_control();
@@ -91,15 +83,12 @@ void loop()
   pkt.right_backward = reverse();
   pkt.left_forward = forward();
   pkt.right_forward = forward();
-
-  //Serial.println(pkt.gripper_height);
   radio.write(&pkt, sizeof(pkt));
   delay(20);
 }
 
 //  FUNCTIONS
-int height_control()  //  FUNCTION TO CONTROL THE HEIGHT OF THE GRIPPER
-{
+int height_control(){  //  FUNCTION TO CONTROL THE HEIGHT OF THE GRIPPER
   //  CURRENT STATES FOR BUTTONS
   int upState;
   upState = digitalRead(upPin);
